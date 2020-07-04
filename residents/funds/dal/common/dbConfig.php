@@ -3,13 +3,13 @@
 if ($_SERVER['DOCUMENT_ROOT'] == 'C:\inetpub\wwwroot') {
 	$DATABASE_HOST = 'localhost';
 	$DATABASE_USER = 'root';
-	$DATABASE_PASS = 'password';
-	$DATABASE_NAME = 'nyms_fin_db';
+	$DATABASE_PASS = '';
+	$DATABASE_NAME = '';
 } else {
-	$DATABASE_HOST = '160.153.133.77';
-	$DATABASE_USER = 'nyms_fin_db_user';
-	$DATABASE_PASS = 'L0nd0n!23';
-	$DATABASE_NAME = 'nyms_fin_db';
+	$DATABASE_HOST = '160xxxxxx';
+	$DATABASE_USER = '';
+	$DATABASE_PASS = ';
+	$DATABASE_NAME = '';
 }
 // Try and connect using the info above.
 $con = mysqli_connect($DATABASE_HOST, $DATABASE_USER, $DATABASE_PASS, $DATABASE_NAME);
