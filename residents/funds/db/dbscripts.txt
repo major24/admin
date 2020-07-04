@@ -1,0 +1,117 @@
+// DB Script
+// nyms_fin_db
+// godaddy: nyms_fin_db
+
+
+CREATE TABLE IF NOT EXISTS nyms_fin_db.users (
+	  id INT AUTO_INCREMENT PRIMARY KEY,
+  	username varchar(50) NOT NULL UNIQUE,
+    firstname varchar(50) NOT NULL,
+    surname varchar(50) NOT NULL,
+  	password char(60) NULL,
+  	email varchar(100) NULL,
+    role varchar(50) NULL,
+    created datetime DEFAULT CURRENT_TIMESTAMP,
+    updated datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    active varchar(3) DEFAULT  'Y'
+);
+
+CREATE TABLE IF NOT EXISTS nyms_fin_db.residents (
+	  id INT AUTO_INCREMENT PRIMARY KEY,
+    referencenumber varchar(50) NOT NULL UNIQUE,
+    firstname varchar(50) NOT NULL,
+    surname varchar(50) NOT NULL,
+  	middlename varchar(30) NULL,
+    dob date NULL,
+    created datetime DEFAULT CURRENT_TIMESTAMP,
+    updated datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    active varchar(3) NULL
+);
+ALTER TABLE nyms_fin_db.residents AUTO_INCREMENT=100;
+
+CREATE TABLE IF NOT EXISTS nyms_fin_db.transactions (
+	  id INT AUTO_INCREMENT PRIMARY KEY,
+    resident_id INT NOT NULL,
+    user_id INT NOT NULL,
+    cr_dr varchar(6) NULL,
+    transaction_type varchar(30),
+    source_type varchar(30),
+    chq_or_receipt_number varchar(30),
+    amount decimal(9,2),
+    description varchar(250) NULL,
+    transaction_date datetime DEFAULT CURRENT_TIMESTAMP,
+    created datetime DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (resident_id) REFERENCES residents(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS nyms_fin_db.logs (
+	  id INT AUTO_INCREMENT PRIMARY KEY,
+    userid INT NULL,
+    logtype varchar(20) NULL,
+    description varchar(10000) NULL,
+    created datetime DEFAULT CURRENT_TIMESTAMP
+);
+
+
+// BANK USER
+INSERT INTO `nyms_fin_db`.`residents`
+(`referencenumber`,
+`firstname`,
+`surname`,
+`active`)
+VALUES
+('BANKUSER', 'bankuser', 'bankuser', 'N');
+
+
+
+
+// DB table naming and values
+// ONLY IMPORTANT fields that require explanations
+table: transactions:
+cr_dr:                    credit | debit
+transaction_type:         Allowance | Resident | Family | Friend
+                          Food and Bev | Personal Care | Transportation | Other
+cheque_reference_number:  bank chq num or receipt number
+source_type:              Cash | Bank
+
+WEB FORM: (field relationship)
+transaction_type    = Income Page:  Transaction Type
+                    = Expense Page: Transaction Type
+source_type         = Source Type
+
+
+
+
+
+
+
+
+// *** TEST Queries - WIP ***
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password
+BY 'password';
+
+// sample
+select * from users;
+insert into users (username, firstname, surname)
+values ('mn', 'maj', 'nall');
+update users set firstname = 'maj2', updated = current_timestamp
+where id = 1
+
+SELECT * FROM nyms_fin_db.residents;
+select * from nyms_fin_db.users;
+select * from nyms_fin_db.transactions;
+select trantype, transactionType, description, amount, date_format(created, "%Y-%m-%d")
+from nyms_fin_db.transactions where residentid = 1;
+SELECT  SUM(amount) cr FROM nyms_fin_db.transactions where residentid = 1 and trantype = 'credit';
+SELECT  SUM(amount) cr FROM nyms_fin_db.transactions where residentid = 1 and trantype = 'debit';
+
+select amountcr, amountdr, (amountcr - amountdr) total_cash_at_hand from
+(select sum(amount) amountcr from nyms_fin_db.transactions
+where sourcetype = 'cash' and trantype = 'credit') as cr,
+(select sum(amount) amountdr from nyms_fin_db.transactions
+where sourcetype = 'cash' and trantype = 'debit') as dr;
+
+select amountcr from
+(select sum(amount) amountcr from nyms_fin_db.transactions
+where sourcetype = 'bank' and trantype = 'credit') as cr;
